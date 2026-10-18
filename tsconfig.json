@@ -1,0 +1,5 @@
+{
+ "extends": "expo/tsconfig.base",
+ "compilerOptions": { "strict": true, "target": "ES2022", "allowImportingTsExtensions": true },
+ "exclude": ["tests", "node_modules"]
+}
