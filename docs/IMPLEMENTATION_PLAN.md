@@ -1,7 +1,9 @@
 # Platform decisions and delivery backlog
 
 ## Decision: universal client
-Use React Native with Expo and TypeScript for web, Android and iOS. React Native Web renders shared primitives in the browser; Expo handles target bundling. Native camera/file access and browser document download will use platform adapters when implemented. Desktop navigation can differ from phone navigation while sharing the business workflow.
+Use React Native with Expo and TypeScript for web, Android and iOS. React Native Web renders shared primitives in the browser; Expo handles target bundling. Native camera/file access and browser document download use platform adapters. Desktop navigation can differ from phone navigation while sharing the business workflow.
+
+19 October increment: local business profiles with logos, quotation PDF export and snapshot-based direct/quotation invoices are implemented. See DOCUMENT_WORKFLOW.md. These local features do not complete the authenticated onboarding, server issuance, tenant isolation or payment milestones below.
 
 The original requirements described a web application/PWA. This decision extends that scope to installable Android and iOS clients. Web cache, device local storage, native secure storage and push notifications have different lifecycles; do not treat them as interchangeable.
 

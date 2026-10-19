@@ -27,6 +27,9 @@ npx expo export --platform all
 
 ## Implemented
 
+- Business profile setup with owner, contact/address, optional registration number, logo, payment instructions and document terms.
+- Branded quotation PDF export. On web, choose Save as PDF in the print dialog; Android/iOS generate a PDF and open the share sheet.
+- Direct invoices and quotation-to-invoice creation, sequential references, due dates, preserved business/customer/item snapshots and invoice PDF export.
 - Shared responsive React Native interface: desktop sidebar, mobile bottom navigation and safe-area handling.
 - Dashboard with derived counts and quotation draft totals.
 - Create/search customers, including Malawi phone normalisation and service site.
@@ -38,7 +41,7 @@ npx expo export --platform all
 
 ## Important boundaries
 
-This is a **single-device local prototype**, not the completed SaaS. It has no authentication, tenant enforcement, worker permissions, public approval links, PDF generation, invoices, payments, attachments or server sync. The draft total is not revenue. Job completion does not imply payment. Do not use this build to store sensitive customer information or as a financial system.
+This is a **single-device local prototype**, not the completed SaaS. Business profile registration is local setup, not online account creation or government registration. It has no authentication, tenant enforcement, worker permissions, public approval links, payment recording, attachments or server sync. The draft total is not revenue. Job completion does not imply payment. Tax is not calculated; documents explicitly state that tax is not charged. Do not use this build to store sensitive customer information or as a financial system.
 
 No backend credentials are required. There is no service-role key or placeholder authentication bypass. AsyncStorage is unencrypted device/browser storage. This demo has no logout because no account exists yet.
 
