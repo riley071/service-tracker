@@ -57,6 +57,9 @@ export type Job = {
   note: string;
 };
 export type AppData = {
+  payments?: Payment[];
+  preferences?: { paymentMethod: string; paymentPhone: string; dueDays: string; compact: boolean };
+  planRequest?: { plan: string; annual: boolean; requestedAt: string };
   version: 1;
   business?: Business;
   invoices?: Invoice[];
@@ -64,6 +67,7 @@ export type AppData = {
   quotes: Quote[];
   jobs: Job[];
 };
+export type Payment = { id: string; invoiceId: string; amount: string; date: string; method: string; reference: string };
 export type Business = {
   name: string;
   owner: string;

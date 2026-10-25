@@ -36,7 +36,7 @@ export function BusinessEditor({ business, onSave, onCancel }: { business?: Busi
   const fields = [['name', 'Business name *'], ['owner', 'Owner name *'], ['phone', 'Business phone *'], ['email', 'Email'], ['address', 'Business address *'], ['registration', 'Business registration number (optional)'], ['paymentDetails', 'Payment instructions / bank details'], ['terms', 'Default document terms']] as const;
   return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 24, gap: 16 }}>
     <Text style={ui.title}>{business ? 'Business profile' : 'Register your business profile'}</Text>
-    <Text style={ui.muted}>Set up your business identity for quotations and invoices. Details are saved on this device. This does not create an online account or register your business with a government authority.</Text>
+    <Text style={ui.muted}>Set up your business identity for quotations and invoices. Details are saved to your private Supabase workspace and appear on new quotations and invoices. This does not register your business with a government authority.</Text>
     {value.logo && <Image accessibilityLabel="Business logo" source={{ uri: value.logo }} style={{ width: 100, height: 100 }} resizeMode="contain" />}
     <View style={ui.row}><Button title="Choose logo" secondary disabled={busy} onPress={logo} />{value.logo && <Button title="Remove logo" secondary disabled={busy} onPress={() => setValue(v => ({ ...v, logo: undefined }))} />}</View>
     {fields.map(([key, label]) => <Field key={key} label={label} value={value[key]} onChangeText={text => setValue(v => ({ ...v, [key]: text }))} multiline={key === 'address' || key === 'paymentDetails' || key === 'terms'} />)}
