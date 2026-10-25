@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { AppData, Invoice, Quote } from '../domain/model';
-import { documentHtml, issueInvoice } from '../domain/documents';
+import { issueInvoice } from '../domain/documents';
 import { money, quoteTotals } from '../domain/money';
-import { exportDocument } from '../data/exportDocument';
+import { exportWithTemplate } from '../data/exportTemplate';
+import { TemplatePicker } from './TemplatePicker';
 import { invoiceBalance, paymentCents } from '../domain/payments';
 import { id, validDate } from '../domain/model';
 import { Badge, Button, Chips, Field, ui } from './ui';
 import { Editor } from './Editor';
 
 export function InvoiceWorkspace({ data, commit, onClose }: { data: AppData; commit: (d: AppData) => Promise<void>; onClose: () => void }) {
+  const [templateInvoice, setTemplateInvoice] = useState<Invoice | null>(null);
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
@@ -35,10 +37,10 @@ export function InvoiceWorkspace({ data, commit, onClose }: { data: AppData; com
     } catch (e) { setError(e instanceof Error ? e.message : 'Could not create invoice.'); throw e; }
     finally { setBusy(false); }
   }
-  async function pdf(i: Invoice) {
+  async function pdf(i: Invoice, templateId: string) {
     setBusy(true); setError('');
-    try { await exportDocument(documentHtml(i, 'Invoice', { paid: invoiceBalance(data, i).paid })); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Could not export invoice.'); }
+    try { await exportWithTemplate(i, 'Invoice', templateId, invoiceBalance(data, i).paid); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not export invoice.'); throw e; }
     finally { setBusy(false); }
   }
   async function recordPayment() {
@@ -57,13 +59,14 @@ export function InvoiceWorkspace({ data, commit, onClose }: { data: AppData; com
   if (paymentInvoice) return <ScrollView contentContainerStyle={{ padding: 24, gap: 16 }}><Text style={ui.title}>Record a payment</Text><Text style={ui.muted}>{paymentInvoice.number} ? Remaining {money(invoiceBalance(data, paymentInvoice).due)}</Text><Text style={ui.muted}>Only record money you have confirmed receiving. This does not charge the customer.</Text><Field label="Amount received (MWK)" value={amount} onChangeText={setAmount} numeric /><Field label="Payment date (YYYY-MM-DD)" value={paymentDate} onChangeText={setPaymentDate} /><Chips items={['Cash', 'Airtel Money', 'TNM Mpamba', 'Bank transfer']} value={method} onChange={setMethod} /><Field label="Transaction reference / receipt note" value={reference} onChangeText={setReference} />{!!error && <Text accessibilityRole="alert">{error}</Text>}<Button title="Confirm received payment" disabled={busy} onPress={() => void recordPayment()} /><Button title="Cancel" secondary disabled={busy} onPress={() => { setPaymentInvoice(null); setError(''); }} /></ScrollView>;
   if (creating) return <View style={{ flex: 1 }}><Field label="Payment due (YYYY-MM-DD)" value={due} onChangeText={setDue} /><Editor kind="quote" data={data} onSave={value => create(value as Quote)} onCancel={() => setCreating(false)} documentKind="invoice" /></View>;
   return <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }}>
+    {templateInvoice && <TemplatePicker onUpgrade={onClose} onClose={() => setTemplateInvoice(null)} onExport={templateId => pdf(templateInvoice, templateId)} />}
     <Text style={ui.title}>Invoices</Text><Text style={ui.muted}>Issue invoices from saved quotations or create one directly. Issued details are preserved when your profile or quotation changes.</Text>
     <Field label="Payment due (YYYY-MM-DD)" value={due} onChangeText={setDue} />
     <Button title="Create direct invoice" disabled={busy || !data.business} onPress={() => setCreating(true)} />
     {!data.business && <Text style={ui.muted}>Set up your business profile to create invoices.</Text>}
     {!!error && <Text accessibilityRole="alert" style={{ color: '#A33124' }}>{error}</Text>}
     <Field label="Search invoices" value={search} onChangeText={setSearch} />
-    {invoices.filter(i => `${i.number} ${i.customer.name} ${i.title}`.toLowerCase().includes(search.toLowerCase())).map(i => <View key={i.id} style={ui.card}><Badge text={invoiceBalance(data, i).due === 0n ? 'Paid' : invoiceBalance(data, i).paid > 0n ? 'Part paid' : i.due < new Date().toISOString().slice(0,10) ? 'Overdue' : 'Unpaid'} /><Text style={ui.title}>{i.number}</Text><Text style={ui.label}>{i.title}</Text><Text style={ui.muted}>{i.customer.name} · Due {i.due}</Text><Text style={ui.title}>{money(quoteTotals(i.lines, i.discount).total)}</Text><Text style={ui.label}>Remaining: {money(invoiceBalance(data, i).due)}</Text>{invoiceBalance(data, i).due > 0n && <Button title="Record payment" disabled={busy} secondary onPress={() => setPaymentInvoice(i)} />}<Button title="Export invoice PDF" disabled={busy} onPress={() => pdf(i)} /></View>)}
+    {invoices.filter(i => `${i.number} ${i.customer.name} ${i.title}`.toLowerCase().includes(search.toLowerCase())).map(i => <View key={i.id} style={ui.card}><Badge text={invoiceBalance(data, i).due === 0n ? 'Paid' : invoiceBalance(data, i).paid > 0n ? 'Part paid' : i.due < new Date().toISOString().slice(0,10) ? 'Overdue' : 'Unpaid'} /><Text style={ui.title}>{i.number}</Text><Text style={ui.label}>{i.title}</Text><Text style={ui.muted}>{i.customer.name} · Due {i.due}</Text><Text style={ui.title}>{money(quoteTotals(i.lines, i.discount).total)}</Text><Text style={ui.label}>Remaining: {money(invoiceBalance(data, i).due)}</Text>{invoiceBalance(data, i).due > 0n && <Button title="Record payment" disabled={busy} secondary onPress={() => setPaymentInvoice(i)} />}<Button title="Export invoice PDF" disabled={busy} onPress={() => setTemplateInvoice(i)} /></View>)}
     {!invoices.length && <Text style={ui.muted}>No invoices issued yet.</Text>}
     <Text style={ui.title}>Payment history</Text>
     {(data.payments ?? []).slice().reverse().map(p => <View key={p.id} style={ui.card}><Text style={ui.label}>{invoices.find(i => i.id === p.invoiceId)?.number} ? {money(paymentCents(p.amount))}</Text><Text style={ui.muted}>{p.date} ? {p.method} ? {p.reference || 'Cash receipt'}</Text></View>)}

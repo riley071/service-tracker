@@ -41,6 +41,14 @@ test('Supabase-only auth and persistence contracts', async () => {
     replies.push({ status: 200, body: 9 });
     await api.cloudSave(workspace);
     assert.equal(JSON.parse(String(calls.at(-1)?.init?.body)).expected_revision, 8);
+    replies.push({ status: 200, body: false });
+    assert.equal(await api.loadTemplateAccess(), false);
+    replies.push({ status: 200, body: [] });
+    await assert.rejects(api.loadPaidTemplateStyle('executive'), /payment-verified/);
+    replies.push({ status: 200, body: [{ css: 'h1{color:navy}' }] });
+    assert.equal(await api.loadPaidTemplateStyle('executive'), 'h1{color:navy}');
+    assert.ok(calls.at(-1)?.path.includes('id=eq.executive'));
+    assert.equal((calls.at(-1)?.init?.headers as Record<string, string>).Authorization, 'Bearer access-a');
     replies.push({ status: 500, body: { message: 'Temporary sign-out error' } });
     await assert.rejects(api.signOut(), /Temporary/);
     assert.equal(api.currentAccount(), null, 'Sign out must clear local access even when remote revocation fails');

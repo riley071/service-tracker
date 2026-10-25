@@ -26,8 +26,8 @@ import { jobStatuses } from "./src/domain/model";
 import { money, quoteTotals } from "./src/domain/money";
 import { BusinessEditor } from "./src/components/BusinessEditor";
 import { InvoiceWorkspace } from "./src/components/InvoiceWorkspace";
-import { documentHtml } from "./src/domain/documents";
-import { exportDocument } from "./src/data/exportDocument";
+import { exportWithTemplate } from "./src/data/exportTemplate";
+import { TemplatePicker } from "./src/components/TemplatePicker";
 import { router, useGlobalSearchParams } from "expo-router";
 import { Login } from "./src/components/Login";
 import { AccountPages } from "./src/components/AccountPages";
@@ -75,6 +75,7 @@ function AppContent() {
   const [workspace, setWorkspace] = useState<"business" | "invoices" | null>(
     null,
   );
+  const [templateQuote, setTemplateQuote] = useState<Quote | null>(null);
   const [exporting, setExporting] = useState(false);
   const mutationLock = useRef(false);
   useEffect(() => {
@@ -115,6 +116,7 @@ function AppContent() {
     setMessage("");
     setEditor(null);
     setEditingQuote(undefined);
+    setTemplateQuote(null);
     setSelectedJob(null);
     setWorkspace(null);
     setSearch("");
@@ -147,36 +149,15 @@ function AppContent() {
     0n,
   );
   const selected = data.jobs.find((j) => j.id === selectedJob);
-  async function quotationPdf(q: Quote) {
-    if (!data || exporting) return;
+  async function quotationPdf(q: Quote, templateId: string) {
+    if (!data || exporting) throw new Error('Another export is already in progress.');
     setExporting(true);
     try {
-      if (!data.business)
-        throw new Error(
-          "Save your business profile before exporting a quotation.",
-        );
-      const recipient = data.customers.find((c) => c.id === q.customerId);
-      if (!recipient)
-        throw new Error("The quotation customer could not be found.");
-      await exportDocument(
-        documentHtml(
-          {
-            ...q,
-            number: `QUO-${q.id.toUpperCase()}`,
-            issuedOn: q.createdAt.slice(0, 10),
-            business: data.business,
-            customer: recipient,
-          },
-          "Quotation",
-        ),
-      );
-    } catch (e) {
-      setMessage(
-        e instanceof Error ? e.message : "Could not export quotation.",
-      );
-    } finally {
-      setExporting(false);
-    }
+      if (!data.business) throw new Error('Save your business profile before exporting a quotation.');
+      const recipient = data.customers.find(c => c.id === q.customerId);
+      if (!recipient) throw new Error('The quotation customer could not be found.');
+      await exportWithTemplate({ ...q, number: `QUO-${q.id.toUpperCase()}`, issuedOn: q.createdAt.slice(0, 10), business: data.business, customer: recipient }, 'Quotation', templateId);
+    } finally { setExporting(false); }
   }
   function open(kind: EditorKind, q?: Quote) {
     setEditingQuote(q);
@@ -678,7 +659,7 @@ function AppContent() {
                             }
                             secondary
                             disabled={exporting}
-                            onPress={() => quotationPdf(q)}
+                            onPress={() => setTemplateQuote(q)}
                           />
                         </View>
                       </View>
@@ -737,6 +718,7 @@ function AppContent() {
 
         </View>
       </View>
+      {templateQuote && <TemplatePicker onClose={() => setTemplateQuote(null)} onExport={templateId => quotationPdf(templateQuote, templateId)} />}
       <Modal visible={menuOpen && !desktop} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setMenuOpen(false)}>
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
           <View style={styles.menuHeader}>

@@ -43,3 +43,12 @@ export async function cloudSave(data: unknown) {
   const next = await request('/rest/v1/rpc/save_workspace', { payload: data, expected_revision: revision }, 'POST', await token());
   revision = next;
 }
+
+export async function loadTemplateAccess(): Promise<boolean> {
+  return (await request('/rest/v1/rpc/has_paid_templates', {}, 'POST', await token())) === true;
+}
+export async function loadPaidTemplateStyle(templateId: string): Promise<string> {
+  const rows = await request(`/rest/v1/document_template_styles?id=eq.${encodeURIComponent(templateId)}&select=css`, undefined, 'GET', await token());
+  if (!rows.length) throw new Error('This template needs an active, payment-verified subscription. Choose a free template or view Plans.');
+  return rows[0].css;
+}

@@ -261,7 +261,7 @@ Tax defaults off. Workfolio is not an MRA-certified electronic tax invoicing sys
 | Starter | MK2,000 | MK20,000 | 50 monthly documents, reusable catalogue and branding |
 | Pro | MK5,000 | MK50,000 | Unlimited documents, recurring drafts and advanced reports |
 
-Annual pricing equals ten monthly payments. These prices and limits are proposals. Plan selection saves interest only. Billing, entitlement enforcement and document quotas are not enabled. All currently implemented features remain accessible. `planRequest` is user-editable interest data, never a trusted paid-subscription state.
+Annual pricing equals ten monthly payments. These prices and limits are proposals. Plan selection saves interest only. Billing, entitlement enforcement and document quotas are not enabled. Core features and three free templates remain accessible. Ten premium templates require verified paid access. `planRequest` is user-editable interest data, never a trusted paid-subscription state.
 
 ## Validation
 
@@ -304,3 +304,8 @@ After applying SQL, run [supabase/verify.sql](supabase/verify.sql) in a developm
 - Review remaining dependency advisories before release; do not use forced package fixes that downgrade the Expo SDK.
 
 See [Malawi research](docs/MALAWI_PRODUCT_RESEARCH.md) for the product sources and [full requirements](docs/REQUIREMENTS_SOURCE.md) for the intended complete system.
+
+
+## Template library
+
+Invoice and quotation exports now offer **3 free templates and 10 paid templates**. Both Starter and Pro verified subscriptions unlock the ten additional designs. Paid styles are stored in Supabase and protected by RLS, with a fresh entitlement check on export. Plan interest does not grant access. For existing projects run `supabase/templates.sql`; new setups include it in `schema.sql`. See [template setup and manual payment verification](docs/TEMPLATES_AND_PAYMENTS.md) before activation. Checkout is not connected.
