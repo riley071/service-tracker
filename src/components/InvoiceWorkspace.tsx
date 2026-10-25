@@ -37,7 +37,7 @@ export function InvoiceWorkspace({ data, commit, onClose }: { data: AppData; com
   }
   async function pdf(i: Invoice) {
     setBusy(true); setError('');
-    try { await exportDocument(documentHtml(i, 'Invoice')); }
+    try { await exportDocument(documentHtml(i, 'Invoice', { paid: invoiceBalance(data, i).paid })); }
     catch (e) { setError(e instanceof Error ? e.message : 'Could not export invoice.'); }
     finally { setBusy(false); }
   }

@@ -26,5 +26,18 @@ test('document escapes customer content, rejects unsafe logos, and prints exact 
   assert.ok(!html.includes('javascript:'));
   assert.ok(html.includes('MWK 180.00'));
   assert.ok(html.includes('Bank transfer'));
-  assert.ok(!documentHtml(invoice, 'Quotation').includes('<h2>Payment details</h2>'));
+  assert.ok(documentHtml(invoice, 'Quotation').includes('Payment instructions'));
+  assert.ok(!documentHtml(invoice, 'Quotation').includes('Balance due')); 
+});
+
+
+test('invoice export separates invoice value, collections and remaining balance', () => {
+  const invoice = issueInvoice(quote, business, customer, [], '2099-01-01');
+  const html = documentHtml(invoice, 'Invoice', { paid: 3000n });
+  assert.ok(html.includes('MWK 180.00'));
+  assert.ok(html.includes('MWK 30.00'));
+  assert.ok(html.includes('MWK 150.00'));
+  assert.ok(html.includes('Amount received'));
+  assert.throws(() => documentHtml(invoice, 'Invoice', { paid: 18001n }));
+  assert.throws(() => documentHtml(invoice, 'Invoice', { paid: -1n }));
 });
