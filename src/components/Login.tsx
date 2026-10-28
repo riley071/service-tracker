@@ -16,7 +16,7 @@ export function Login({ onEnter }: { onEnter: () => void }) {
       if (reset) { await resetPassword(email); setMessage('If this account exists, a recovery email has been requested. Follow your configured recovery flow.'); return; }
       if (password.length < 8) throw new Error('Use at least 8 characters for your password.');
       if (await authenticate(email, password, signup)) onEnter();
-      else setMessage('Check your email to confirm your account, then sign in.');
+      else setMessage('Email confirmation sent. Check your inbox and spam folder, then confirm your email before signing in.');
     } catch (e) { setMessage(e instanceof Error ? e.message : 'Unable to sign in.'); }
     finally { setBusy(false); }
   }
