@@ -1,22 +1,12 @@
-export type Trade =
-  | "Painting"
-  | "Construction"
-  | "Cleaning"
-  | "Welding"
-  | "Electrical"
-  | "Plumbing"
-  | "Carpentry"
-  | "Other";
-export const trades: Trade[] = [
-  "Painting",
-  "Construction",
-  "Cleaning",
-  "Welding",
-  "Electrical",
-  "Plumbing",
-  "Carpentry",
-  "Other",
+// Services also accept custom names, preserved with the quotation or job.
+export type Trade = string;
+export const serviceGroups = [
+  { label: "Digital & creative", items: ["Web development", "Mobile app development", "Software development", "Graphic design", "Logo & brand design", "UI/UX design", "Photography", "Videography", "Video editing", "Animation", "Illustration", "Music & audio production"] },
+  { label: "Freelance & business", items: ["Copywriting", "Content writing", "Editing & proofreading", "Translation", "Transcription", "Social media management", "Digital marketing", "SEO", "Virtual assistance", "Data entry", "Bookkeeping", "Accounting", "Business consulting", "Tutoring", "Training", "IT support", "Computer repair", "Research"] },
+  { label: "Trades & manual labour", items: ["Painting", "Construction", "Bricklaying", "Plastering", "Roofing", "Tiling", "Flooring", "Cleaning", "Welding", "Electrical", "Plumbing", "Carpentry", "Furniture assembly", "Gardening", "Landscaping", "Lawn care", "Tree cutting", "General labour", "Handyman", "Moving & removals", "Loading & unloading", "Delivery & courier", "Waste removal", "Pest control", "Appliance repair", "Air conditioning & refrigeration", "Solar installation", "Vehicle repair", "Car washing", "Farm labour", "Borehole & water pump services"] },
+  { label: "Personal & event services", items: ["Catering", "Baking", "Event planning", "Event decoration", "DJ services", "Tailoring & alterations", "Hairdressing", "Makeup & beauty", "Laundry & ironing", "Upholstery"] },
 ];
+export const trades: Trade[] = [...serviceGroups.flatMap(group => group.items), "Other"];
 export type Customer = {
   id: string;
   name: string;

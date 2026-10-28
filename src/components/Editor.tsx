@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { Button, Chips, Field, ui } from "./ui";
-import { id, normalisePhone, trades, validDate } from "../domain/model";
+import { id, normalisePhone, validDate } from "../domain/model";
+import { ServiceSelect } from "./ServiceSelect";
 import type {
   AppData,
   Customer,
@@ -71,6 +72,7 @@ export function Editor({
           site: site.trim(),
         });
       else {
+        if (!trade.trim()) throw new Error("Enter a service name.");
         if (!data.customers.some((c) => c.id === customerId))
           throw new Error("Add and select a customer first.");
         if (kind === "quote") {
@@ -79,7 +81,7 @@ export function Editor({
             id: quote?.id ?? id(),
             customerId,
             title: name.trim(),
-            trade,
+            trade: trade.trim(),
             lines: lines.map((l) => ({
               ...l,
               description: l.description.trim(),
@@ -95,7 +97,7 @@ export function Editor({
             id: id(),
             customerId,
             title: name.trim(),
-            trade,
+            trade: trade.trim(),
             due,
             status: "Scheduled",
             note: note.trim(),
@@ -171,12 +173,7 @@ export function Editor({
               Create a customer before saving this work.
             </Text>
           )}
-          <Text style={ui.label}>Service</Text>
-          <Chips
-            items={trades}
-            value={trade}
-            onChange={(s) => setTrade(s as Trade)}
-          />
+          <ServiceSelect value={trade} onChange={setTrade} />
           {kind === "job" ? (
             <>
               <Field
