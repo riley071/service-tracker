@@ -421,6 +421,20 @@ Developer preview scripts are available at `tests/preview-document.ts` and `test
 
 Environment values are included at build time. Rebuild after changing them.
 
+### Install on a phone (PWA)
+
+The web export includes a Workfolio manifest, home-screen icons, an install banner and a service worker with an offline connection message. No additional package is needed.
+
+Deploy `dist/` at the root of an **HTTPS** website. Serve real static files before applying the SPA fallback: `/manifest.json`, `/pwa.js`, `/sw.js` and `/icons/*` must return their files, not `index.html`. Serve `/sw.js` with JavaScript content type and `Cache-Control: no-cache` so updates are checked. Redeploy the entire export together.
+
+- **Android:** open the hosted address in Chrome and tap **Install app** when offered, or use the browser menu's **Install app / Add to Home screen** option.
+- **iPhone/iPad:** open the hosted address in Safari, use **Share → Add to Home Screen**, then confirm **Add**.
+- Launch **Workfolio** from the home screen to use the standalone app window.
+
+The browser decides when an installation prompt is available. Development mode is not the installation test: test the production export over HTTPS on a real phone. Confirm the icon, standalone launch, section refreshes, sign-in and a fresh deployment update. Turning off the connection should show the connection message on a new navigation. Business records still require Supabase connectivity; offline editing/sync is not implemented, and installation does not change the memory-only login session.
+
+PWA source files live in `public/`; Expo copies them into `dist/` during `npm run build:web`. The service worker handles navigation failures only and does not cache authenticated requests or workspace data.
+
 ### Android and iOS
 
 Native signing, application identifiers, EAS configuration and store submission are not provisioned by this repository. Configure those before creating production builds. The project uses Expo Continuous Native Generation; do not create or edit generated `ios/` and `android/` folders manually.
