@@ -47,6 +47,9 @@ export type Job = {
   note: string;
 };
 export type AppData = {
+  tasks?: Task[];
+  projects?: Project[];
+  leads?: Lead[];
   payments?: Payment[];
   preferences?: { paymentMethod: string; paymentPhone: string; dueDays: string; compact: boolean };
   planRequest?: { plan: string; annual: boolean; requestedAt: string };
@@ -57,6 +60,9 @@ export type AppData = {
   quotes: Quote[];
   jobs: Job[];
 };
+export type Task = { id: string; title: string; note: string; due: string; priority: 'Low' | 'Normal' | 'High'; status: 'To do' | 'In progress' | 'Done'; projectId: string; leadId: string; createdAt: string; completedAt?: string };
+export type Project = { id: string; title: string; note: string; due: string };
+export type Lead = { id: string; company: string; email: string; note: string; followUp: string; stage: 'New' | 'Contacted' | 'Proposal sent' | 'Won' | 'Lost' };
 export type Payment = { id: string; invoiceId: string; amount: string; date: string; method: string; reference: string };
 export type Business = {
   name: string;

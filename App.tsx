@@ -26,6 +26,7 @@ import { jobStatuses } from "./src/domain/model";
 import { money, quoteTotals } from "./src/domain/money";
 import { BusinessEditor } from "./src/components/BusinessEditor";
 import { InvoiceWorkspace } from "./src/components/InvoiceWorkspace";
+import { TaskSummary, WorkManagement } from "./src/components/WorkManagement";
 import { exportWithTemplate } from "./src/data/exportTemplate";
 import { TemplatePicker } from "./src/components/TemplatePicker";
 import { router, useGlobalSearchParams } from "expo-router";
@@ -39,6 +40,9 @@ import {
 } from "./src/data/account";
 const pages = [
   "Overview",
+  "Tasks",
+  "Projects",
+  "Leads",
   "Invoices",
   "Quotations",
   "Customers",
@@ -409,7 +413,9 @@ function AppContent() {
                 </Text>
               </Pressable>
             )}
-            {["Profile", "Settings", "Plans", "Reports"].includes(page) ? (
+            {["Tasks", "Projects", "Leads"].includes(page) ? (
+              <WorkManagement key={page} page={page} data={data} commit={commit} />
+            ) : ["Profile", "Settings", "Plans", "Reports"].includes(page) ? (
               <AccountPages
                 key={page}
                 page={page}
@@ -425,6 +431,8 @@ function AppContent() {
               />
             ) : page === "Overview" ? (
               <>
+                <TaskSummary data={data} />
+                <Button title="Plan my day" onPress={() => setPage("Tasks")} />
                 <View style={styles.stats}>
                   {[
                     {

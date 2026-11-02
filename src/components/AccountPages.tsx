@@ -6,6 +6,7 @@ import { invoiceBalance } from '../domain/payments';
 import { changePassword, currentAccount } from '../data/account';
 import { exportExcel } from '../data/excel';
 import { Badge, Button, Chips, Field, ui } from './ui';
+import { TaskSummary } from './WorkManagement';
 
 export function AccountPages({ page, data, commit, logout }: { page: string; data: AppData; commit: (d: AppData) => Promise<void>; logout: () => void }) {
   const [annual, setAnnual] = useState(false);
@@ -20,6 +21,7 @@ export function AccountPages({ page, data, commit, logout }: { page: string; dat
   const invoices = data.invoices ?? [];
   const totals = invoices.reduce((s, i) => { const b = invoiceBalance(data, i); return { billed: s.billed + b.total, paid: s.paid + b.paid, due: s.due + b.due }; }, { billed: 0n, paid: 0n, due: 0n });
   return <View style={{ gap: 20 }}>
+    {page === 'Reports' && <TaskSummary data={data} />}
     {!!message && <Text accessibilityRole="alert" style={ui.muted}>{message}</Text>}
     {page === 'Plans' && <>
       <Badge text="ROOM TO GROW" /><Text style={[ui.title, { fontSize: 32 }]}>A small price for less paperwork.</Text><Text style={ui.muted}>Proposed plans for independent workers and growing businesses. Your records and basic exports remain accessible on every plan.</Text>
