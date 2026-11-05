@@ -87,12 +87,29 @@ function AppContent() {
     let active = true;
     cloudLoad()
       .then((saved) => {
-        if (active) setData(saved ?? { version: 1, customers: [], quotes: [], jobs: [], invoices: [], payments: [] });
+        if (active)
+          setData(
+            saved ?? {
+              version: 1,
+              customers: [],
+              quotes: [],
+              jobs: [],
+              invoices: [],
+              payments: [],
+            },
+          );
       })
       .catch((error: unknown) => {
-        if (active) setLoadError(error instanceof Error ? error.message : 'Unable to load your Supabase workspace. Check your connection and database setup.');
+        if (active)
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : "Unable to load your Supabase workspace. Check your connection and database setup.",
+          );
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [entered]);
   async function commit(next: AppData) {
     if (mutationLock.current)
@@ -127,7 +144,14 @@ function AppContent() {
     setMenuOpen(false);
     router.replace("/");
   }
-  if (!entered || !currentAccount()) return <Login onEnter={() => { if (currentAccount()) setEntered(true); }} />;
+  if (!entered || !currentAccount())
+    return (
+      <Login
+        onEnter={() => {
+          if (currentAccount()) setEntered(true);
+        }}
+      />
+    );
   if (loadError)
     return (
       <View style={styles.loading}>
@@ -154,14 +178,31 @@ function AppContent() {
   );
   const selected = data.jobs.find((j) => j.id === selectedJob);
   async function quotationPdf(q: Quote, templateId: string) {
-    if (!data || exporting) throw new Error('Another export is already in progress.');
+    if (!data || exporting)
+      throw new Error("Another export is already in progress.");
     setExporting(true);
     try {
-      if (!data.business) throw new Error('Save your business profile before exporting a quotation.');
-      const recipient = data.customers.find(c => c.id === q.customerId);
-      if (!recipient) throw new Error('The quotation customer could not be found.');
-      await exportWithTemplate({ ...q, number: `QUO-${q.id.toUpperCase()}`, issuedOn: q.createdAt.slice(0, 10), business: data.business, customer: recipient }, 'Quotation', templateId);
-    } finally { setExporting(false); }
+      if (!data.business)
+        throw new Error(
+          "Save your business profile before exporting a quotation.",
+        );
+      const recipient = data.customers.find((c) => c.id === q.customerId);
+      if (!recipient)
+        throw new Error("The quotation customer could not be found.");
+      await exportWithTemplate(
+        {
+          ...q,
+          number: `QUO-${q.id.toUpperCase()}`,
+          issuedOn: q.createdAt.slice(0, 10),
+          business: data.business,
+          customer: recipient,
+        },
+        "Quotation",
+        templateId,
+      );
+    } finally {
+      setExporting(false);
+    }
   }
   function open(kind: EditorKind, q?: Quote) {
     setEditingQuote(q);
@@ -208,32 +249,28 @@ function AppContent() {
   const nav = (
     <>
       {pages.map((p) => (
-          <Pressable
-            key={p}
-            accessibilityRole="button"
-            accessibilityState={{ selected: page === p }}
-            onPress={() => {
-              setPage(p);
-              setMenuOpen(false);
-              setSearch("");
-              setFilter("All");
-            }}
+        <Pressable
+          key={p}
+          accessibilityRole="button"
+          accessibilityState={{ selected: page === p }}
+          onPress={() => {
+            setPage(p);
+            setMenuOpen(false);
+            setSearch("");
+            setFilter("All");
+          }}
+          style={[styles.navItem, page === p && styles.navActive]}
+        >
+          <Text
             style={[
-              styles.navItem,
-              page === p && styles.navActive,
-
+              styles.navText,
+              page === p && { color: colors.green, fontWeight: "700" },
             ]}
           >
-            <Text
-              style={[
-                styles.navText,
-                page === p && { color: colors.green, fontWeight: "700" },
-              ]}
-            >
-              {p}
-            </Text>
-          </Pressable>
-        ))}
+            {p}
+          </Text>
+        </Pressable>
+      ))}
     </>
   );
   return (
@@ -273,22 +310,49 @@ function AppContent() {
           <View
             style={[styles.topbar, { paddingHorizontal: desktop ? 36 : 20 }]}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-              {!desktop && <Pressable accessibilityRole="button" accessibilityLabel="Open navigation menu" accessibilityState={{ expanded: menuOpen }} onPress={() => setMenuOpen(true)} style={({ pressed }) => [styles.menuButton, { opacity: pressed ? 0.65 : 1 }]}>
-                <View accessible={false} style={{ gap: 5 }}><View style={styles.menuLine} /><View style={styles.menuLine} /><View style={styles.menuLine} /></View>
-              </Pressable>}
-            <Text numberOfLines={1} style={[ui.muted, { flexShrink: 1 }]}>
-              {desktop ? "Workspace  /  " : ""}
-              <Text style={{ color: colors.ink, fontWeight: "600" }}>
-                {page}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              {!desktop && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Open navigation menu"
+                  accessibilityState={{ expanded: menuOpen }}
+                  onPress={() => setMenuOpen(true)}
+                  style={({ pressed }) => [
+                    styles.menuButton,
+                    { opacity: pressed ? 0.65 : 1 },
+                  ]}
+                >
+                  <View accessible={false} style={{ gap: 5 }}>
+                    <View style={styles.menuLine} />
+                    <View style={styles.menuLine} />
+                    <View style={styles.menuLine} />
+                  </View>
+                </Pressable>
+              )}
+              <Text numberOfLines={1} style={[ui.muted, { flexShrink: 1 }]}>
+                {desktop ? "Workspace  /  " : ""}
+                <Text style={{ color: colors.ink, fontWeight: "600" }}>
+                  {page}
+                </Text>
               </Text>
-            </Text>
             </View>
             <View style={ui.row}>
-              {desktop && <><View style={styles.dot} />
-              <Text style={{ fontSize: 12, color: colors.muted }}>
-                {saving ? "Saving..." : "Cloud workspace"}
-              </Text></>}
+              {desktop && (
+                <>
+                  <View style={styles.dot} />
+                  <Text style={{ fontSize: 12, color: colors.muted }}>
+                    {saving ? "Saving..." : "Cloud workspace"}
+                  </Text>
+                </>
+              )}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Open profile"
@@ -396,7 +460,8 @@ function AppContent() {
             </View>
             <View style={styles.notice}>
               <Text style={{ fontSize: 13, lineHeight: 20, color: "#586348" }}>
-                Private account workspace. Payments are recorded manually; public approvals and automatic collection are not connected.
+                Private account workspace. Payments are recorded manually;
+                public approvals and automatic collection are not connected.
               </Text>
             </View>
             {!!message && (
@@ -414,7 +479,12 @@ function AppContent() {
               </Pressable>
             )}
             {["Tasks", "Projects", "Leads"].includes(page) ? (
-              <WorkManagement key={page} page={page} data={data} commit={commit} />
+              <WorkManagement
+                key={page}
+                page={page}
+                data={data}
+                commit={commit}
+              />
             ) : ["Profile", "Settings", "Plans", "Reports"].includes(page) ? (
               <AccountPages
                 key={page}
@@ -723,25 +793,77 @@ function AppContent() {
               Workfolio / Your service business workspace
             </Text>
           </ScrollView>
-
         </View>
       </View>
-      {templateQuote && <TemplatePicker onClose={() => setTemplateQuote(null)} onExport={templateId => quotationPdf(templateQuote, templateId)} />}
-      <Modal visible={menuOpen && !desktop} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setMenuOpen(false)}>
+      {templateQuote && (
+        <TemplatePicker
+          onClose={() => setTemplateQuote(null)}
+          onExport={(templateId) => quotationPdf(templateQuote, templateId)}
+        />
+      )}
+      <Modal
+        visible={menuOpen && !desktop}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => setMenuOpen(false)}
+      >
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
           <View style={styles.menuHeader}>
-            <View style={{ gap: 4, flex: 1 }}><Text style={ui.title}>Workfolio</Text><Text numberOfLines={1} style={ui.muted}>{data.business?.name || 'Your workspace'}</Text></View>
-            <Button title="Close" secondary onPress={() => setMenuOpen(false)} />
+            <View style={{ gap: 4, flex: 1 }}>
+              <Text style={ui.title}>Workfolio</Text>
+              <Text numberOfLines={1} style={ui.muted}>
+                {data.business?.name || "Your workspace"}
+              </Text>
+            </View>
+            <Button
+              title="Close"
+              secondary
+              onPress={() => setMenuOpen(false)}
+            />
           </View>
-          <ScrollView contentContainerStyle={{ padding: 20, gap: 8, paddingBottom: 32 }}>
+          <ScrollView
+            contentContainerStyle={{ padding: 20, gap: 8, paddingBottom: 32 }}
+          >
             <Text style={[styles.eyebrow, { marginBottom: 8 }]}>WORKSPACE</Text>
-            {pages.map((p, index) => <React.Fragment key={p}>
-              {index === 6 && <Text style={[styles.eyebrow, { marginTop: 20, marginBottom: 8 }]}>ACCOUNT</Text>}
-              <Pressable accessibilityRole="button" accessibilityLabel={`Go to ${p}`} accessibilityState={{ selected: page === p }} onPress={() => { setPage(p); setMenuOpen(false); setSearch(''); setFilter('All'); }} style={({ pressed }) => [styles.mobileNavItem, page === p && styles.navActive, pressed && { opacity: 0.65 }]}>
-                <Text style={[styles.mobileNavText, page === p && { color: colors.green, fontWeight: '700' }]}>{p}</Text>
-                <Text style={{ color: colors.green, fontSize: 14 }}>{page === p ? 'Current' : '\u203a'}</Text>
-              </Pressable>
-            </React.Fragment>)}
+            {pages.map((p, index) => (
+              <React.Fragment key={p}>
+                {index === 6 && (
+                  <Text
+                    style={[styles.eyebrow, { marginTop: 20, marginBottom: 8 }]}
+                  >
+                    ACCOUNT
+                  </Text>
+                )}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Go to ${p}`}
+                  accessibilityState={{ selected: page === p }}
+                  onPress={() => {
+                    setPage(p);
+                    setMenuOpen(false);
+                    setSearch("");
+                    setFilter("All");
+                  }}
+                  style={({ pressed }) => [
+                    styles.mobileNavItem,
+                    page === p && styles.navActive,
+                    pressed && { opacity: 0.65 },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.mobileNavText,
+                      page === p && { color: colors.green, fontWeight: "700" },
+                    ]}
+                  >
+                    {p}
+                  </Text>
+                  <Text style={{ color: colors.green, fontSize: 14 }}>
+                    {page === p ? "Current" : "\u203a"}
+                  </Text>
+                </Pressable>
+              </React.Fragment>
+            ))}
           </ScrollView>
         </SafeAreaView>
       </Modal>
@@ -965,9 +1087,38 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: 13,
   },
-  menuButton: { width: 46, height: 46, borderRadius: 12, backgroundColor: '#EDF2EB', alignItems: 'center', justifyContent: 'center' },
-  menuLine: { width: 20, height: 2, borderRadius: 1, backgroundColor: colors.ink },
-  menuHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, padding: 20, borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.white },
-  mobileNavItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 56, borderRadius: 12, paddingHorizontal: 18, paddingVertical: 15, backgroundColor: colors.white },
+  menuButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: "#EDF2EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuLine: {
+    width: 20,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: colors.ink,
+  },
+  menuHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+  },
+  mobileNavItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 56,
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 15,
+    backgroundColor: colors.white,
+  },
   mobileNavText: { fontSize: 17, color: colors.ink },
 });
