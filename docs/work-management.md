@@ -1,6 +1,6 @@
 # Work management
 
-Task, projects and leads are part of the existing private Supabase workspace JSON. Older workspaces open with empty lists; no migration is required. Existing quotations, invoices and jobs stay available. The overview and Reports show task totals; Tasks > Today includes overdue work. Dates use the device calendar. Dates shown in the app are not push or email notifications.
+Task, projects and leads are part of the existing private Supabase workspace JSON. Older workspaces open with empty lists; no migration is required. Existing quotations, invoices and jobs stay available. The overview and Reports show task totals; Tasks > Today includes overdue work. Dates use the device calendar. Dates shown in the app are not push or email notifica
 
 ## Next implementation phases
 
